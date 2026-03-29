@@ -15,6 +15,8 @@ export const EXPENSE_CATEGORIES: CategoryDef[] = [
   { id: 'travel', label: 'Travel', icon: '✈️', color: '#14b8a6', type: 'expense' },
   { id: 'insurance', label: 'Insurance', icon: '🛡️', color: '#64748b', type: 'expense' },
   { id: 'personal', label: 'Personal Care', icon: '💆', color: '#a78bfa', type: 'expense' },
+  { id: 'sports', label: 'Sports', icon: '⚽', color: '#22d3ee', type: 'expense' },
+  { id: 'home_appliances', label: 'Home Appliances', icon: '🏗️', color: '#78716c', type: 'expense' },
   { id: 'other_expense', label: 'Other', icon: '📦', color: '#94a3b8', type: 'expense' },
 ]
 

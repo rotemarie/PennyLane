@@ -32,6 +32,11 @@ export async function addTransaction(tx: Omit<Transaction, 'id' | 'created_at'>)
   return data
 }
 
+export async function updateTransaction(id: string, changes: Partial<Omit<Transaction, 'id' | 'created_at'>>) {
+  const { error } = await supabase.from('transactions').update(changes).eq('id', id)
+  if (error) throw error
+}
+
 export async function deleteTransaction(id: string) {
   const { error } = await supabase.from('transactions').delete().eq('id', id)
   if (error) throw error

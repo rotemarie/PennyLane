@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
 } from 'recharts'
-import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Wallet, TrendingUp } from 'lucide-react'
+import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Wallet, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
 import MonthPicker from '@/components/MonthPicker'
 import { getTransactions } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
@@ -87,32 +87,7 @@ export default function DashboardPage() {
             <StatCard icon={<Wallet size={18} />} label="Transactions" value={String(txns.length)} color="text-blue-400" />
           </div>
 
-          {pieData.length > 0 && (
-            <div className="card">
-              <p className="section-title">Spending Breakdown</p>
-              <div className="flex items-center gap-4">
-                <div className="w-36 h-36 flex-shrink-0">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={55} paddingAngle={2} strokeWidth={0}>
-                        {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex-1 space-y-2 overflow-hidden">
-                  {pieData.slice(0, 5).map((item) => (
-                    <div key={item.name} className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                      <span className="text-sm text-slate-300 truncate flex-1">{item.icon} {item.name}</span>
-                      <span className="text-sm font-medium text-slate-100 tabular-nums">{formatCurrency(item.value)}</span>
-                    </div>
-                  ))}
-                  {pieData.length > 5 && <p className="text-xs text-slate-500">+{pieData.length - 5} more</p>}
-                </div>
-              </div>
-            </div>
-          )}
+          {pieData.length > 0 && <SpendingBreakdown pieData={pieData} total={expenses} />}
 
           {pieData.length === 0 && txns.length === 0 && (
             <div className="card text-center py-10">
@@ -168,6 +143,59 @@ function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label:
     <div className="card">
       <div className={`flex items-center gap-1.5 text-xs font-medium mb-1 ${color}`}>{icon} {label}</div>
       <p className="text-xl font-bold text-slate-100 tabular-nums">{value}</p>
+    </div>
+  )
+}
+
+function SpendingBreakdown({ pieData, total }: { pieData: { name: string; value: number; color: string; icon: string }[]; total: number }) {
+  const [expanded, setExpanded] = useState(false)
+  const displayData = expanded ? pieData : pieData.slice(0, 4)
+
+  return (
+    <div className="card">
+      <div className="flex items-center justify-between mb-3">
+        <p className="section-title mb-0">Spending Breakdown</p>
+        <span className="text-xs text-slate-500">{formatCurrency(total)} total</span>
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="w-36 h-36 flex-shrink-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={30} outerRadius={55} paddingAngle={2} strokeWidth={0}>
+                {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="flex-1 space-y-2 overflow-hidden">
+          {displayData.map((item) => {
+            const pct = total > 0 ? Math.round((item.value / total) * 100) : 0
+            return (
+              <div key={item.name}>
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                  <span className="text-sm text-slate-300 truncate flex-1">{item.icon} {item.name}</span>
+                  <span className="text-sm font-medium text-slate-100 tabular-nums">{formatCurrency(item.value)}</span>
+                </div>
+                <div className="ml-[18px] mt-1 flex items-center gap-2">
+                  <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: item.color }} />
+                  </div>
+                  <span className="text-[10px] text-slate-500 w-8 text-right">{pct}%</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      {pieData.length > 4 && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full mt-3 flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 py-1 transition-colors"
+        >
+          {expanded ? <><ChevronUp size={14} /> Show less</> : <><ChevronDown size={14} /> Show all {pieData.length} categories</>}
+        </button>
+      )}
     </div>
   )
 }
